@@ -1,0 +1,597 @@
+POSTMAN
+--------
+Client -> Initiate the request contain where browser n alll
+Server --> response is providedd by server in html, xml foramt (available network)
+
+whenever the request is sent, there will some webserive
+which will fetch the data and provide
+
+Architecture:
+-------------
+1 tier-->  2 layers, (client and file server) --> 1 component 1 pc, no internet nothing.
+-------
+2 tier --> 2 parts client and database layer..
+-------
+2 parts:
+client(can be multiple)<---> Database(Actual data)
+No internet --> require LAN -- just to push
+
+3 tier --> All webApplication comes under this.
+------
+client --> n browser <--> business login <---> server (DB)
+
+Presentation layer --- Application layer --- Data layer
+
+Requestt --> BL ---> DB layer
+DB layer --> Bl  ---> PL (UI format)
+
+Testing in PL --> GUI testing [selenium]-- need browser
+Data coming from BL layer, PL is just an interface to display
+
+conducting testing on BL layer without using PL--> API testing
+
+BL contain programs
+
+conducting testing on DB layer without using PL--> DB testing
+- adding deletng table rows etc
+
+Webservice:
+-----------
+All webservices are API's.
+if API available  through internet---> it is a webservice
+
+Dev will give API to test ---> Qa ---> production
+
+But,
+
+
+All API is not webservices. [if API not available on the web then it is only API, else webservice]
+
+Types:
+------
+1. SOAP (Simple Object Access protocall) --> Old and complex (POST request)
+2. REST (Representational State Transfer) --> Latest -- All formats HTML,JSON,TEXT,XML (Get,Put,PUT, DELETE)
+
+4 type of requests:
+-------------------
+1. Get - (Select)
+2. POST - (Create)
+3. PUT - (update)
+4. DELETE - (Delete)
+
+Focus on REST:
+--------------
+input-> urls endpoints
+type of req -> get post
+body? -> new record
+Validate response
+Failure response - if failed
+status code --> 200,201 success
+
+Endpoint:
+---------
+	c
+
+https://reqres.in --> domain
+/api/users --> path parameter
+page=2 --> Query parameter
+
+All these 3 combine URL and if URL Contais everthng (Uniform resource identifiers)
+
+IMP Op:HTTP  Request:
+----------------------
+Get  - get data from server
+Post - crreate new record in the server. Note: Need to pass req body / req payload(actual terrm)
+	Request Payload
+	---------------
+	What kind of record? what kind of page you are going to create?
+Put - update existing record , Request Payload
+Delete - delete the record
+
+Will get response: JSON format,can be HTML,XML,TEXT
+
+1. GET
+https://reqres.in/api/users?page=2
+page=2 query param
+2 indicate page 2
+
+this will give the response
+Validate:
+- body
+- headers
+- cookies
+- Test Results (After adding validation)
+
+Add Validations:
+----------------
+Under tests tab we add the validations
+tests["Validating Status Code"] = responseCode.code == 200;
+Frmt:
+- tests - keyword
+- ["description or test case id"]
+- = after equal actual valition
+- responseCode.code == 200  [compare, if 200 then pass else fail]
+
+Note: Right side should have "==" as comparing
+
+tests["Validating response body"] = responseBody.has("michael.lawson@reqres.in");
+- verify the whole json response weather this val is present or not.
+- if want to check on a specific area [ex: page=2], need to write JS code then.
+
+	var response  = JSON.parse(responseBody);
+	tests["Validating in actual place"] = response.page = 2;
+
+-created response variable using var keyword
+
+
+var response = JSON.parse(responseBody);
+tests["page no"] = response.page == 2;
+
+1. https://reqres.in/api/users?page=2
+After ? page=2 is displyed - query parameter
+2. https://reqres.in/api/users/2
+only having path parameter
+2 here is idd, returns single user
+
+Difference between path parameter and query parameter?
+---------------------------------------------------------
+query parameter will filter the data
+path parameter will get the data from the server based on path provided
+
+Notee: When running the JS, we need to provide the full json path of the finding element
+like:
+var response = JSON.parse(responseBody);
+response.data.first_name == "firstname";
+
+ChromeExtenstion: JSON path finder for complex JSONs.
+
+
+POST Request:
+-------------
+- pass request payload in JSON, create new record.
+payload:
+{
+"name": "morpheus",
+"job": "leader"
+}
+response to verify:
+
+{
+"name": "morpheus",
+"job": "leader",
+"id": "256",
+"createdAt": "2018-07-
+07T05:43:53.310Z"
+}
+
+POST> Enter API > Body tab > TEXT > Enter the payload > sub format REST API supports
+
+Request payload will be there for only POST and PUT request.
+and the response we get, we call it
+Response payload
+
+Validate test
+tests["status"] = responseCode.code==201;
+var response = JSON.parse(responseBody);
+tests["Validate name"] = response.name == "morpheus";
+tests["Validate Jon"] = response.job == "leader";
+tests["validate response has id"] = responseBody.has("id");
+tests["Validate ressponse has created at time"] = responseBody.has("createdAt");
+
+above was creating a new record.
+
+we have 2 kind of POST requests:
+1. Create the record
+2. Validate that some data is present in DB or not [Authentication]
+	ex: when logging in:
+		username and pwd will be taken by some API [existing credential]
+		this credential will be sent to the server
+		and server side will be validated
+		if valid:
+			send some pass token and API will allow to login
+
+Send POST request > But Not Validating anything > passing the data along with req
+> get the token back < if valid user allowed > if not not allowed.
+
+1 more type:
+send some data > POST submit > API recieve data and direcctly create in DB
+
+Example:
+Email and pwd sending through API (Not using UI)
+Request:
+Valid:
+{
+    "email": "eve.holt@reqres.in",
+    "password": "cityslicka"
+}
+invalid:
+{
+"email": "peter@klaven",
+"password": "cityslicka"
+}
+
+Response:
+expected to recieve token.
+{
+"token": "QpwL5tke4Pnpja7X"
+}
+
+tests["Validating token presence"] = responseBody.has("token");
+
+
+
+tests["Validate status code as 400 when password is missing"] = responseCode.code = 400;
+var response = JSON.parse(responseBody);
+
+tests["Validate error message should be displayed as missing password"] = response.error == "Missing password";
+
+
+var response = JSON.parse(responseBody);
+tests["validate name of EE where id is 2 should be Garrett Winters"] = response.data[1].employee_name == "Garrett Winters";
+
+3rd Session
+-----------
+1. Data Driver Testing : same request with multiple set of data
+2. How to run collection
+3. Export/Importing collections
+
+Data Driven Testing:
+--------------------
+Post request > raw > json
+send the body with it. id will be generated dynically
+
+tests["verify code"] = responseCode.code == 200;
+
+
+Verify the headers?
+write the java function
+
+pm.test("check the content-type header", function()
+{
+	pm.response.to.be.header("Content-Type","expected");
+}
+)
+
+prepare data is json,csv format and pass it dynamically
+CSV:
+name	salary	age
+
+JSON
+{
+"name" : "john"
+"salary" : "123412"
+"age" : 23
+}
+
+POSTMAN:
+Request body format
+
+
+"name" : "{{name}}"
+"salary" : "{{salary}}"
+"age" : "{{age}}"
+}
+
+DATA.CSV
+name,salary,age
+test1,11,1111
+test2,22,2222
+test3,33,3333
+test4,44,4444
+
+DATA.JSON:  list of dictionary
+[{},{},{}]
+
+open the runner and add the collection
+iteration = number of data you want to run 
+2 = 2 sets of data will be ran
+delay: delay for each request in ms (BP: 3ms)
+
+upload the file,
+
+preview the data correctly align or not
+then:
+run data driven testing (single shot all will be run)
+
+Run Collections in a single shot
+------------------------------------------
+1. Runner:
+drag and  drop the collection
+select iteration and delay
+run - all will be run
+
+2. Command line:
+install some tools
+- export the collection to local
+	DemorestAPI.postman_collection.json
+- pre-requisite:	
+	install node js
+	install npm (comes with node js)
+	install newman
+		- npm install -g newman (reports)
+2.1 1st method using command
+	- newman run collectionfile.json
+	
+2.2 2nd method with html reports (npm install newman-reporter-html)
+	- - newman run collectionfile.json -r html
+
+2.3 3rd method directly from cloud (remotelly))
+	- share your collection, 3 dots share collection
+	- select team/workspace
+	- get public link and share the link
+	- https://www.getpostman.com/collections/0116206bb246a112f011
+	- cmd is newman run https://www.getpostman.com/collections/0116206bb246a112f011
+
+4th session:
+------------
+How to create your own API in local machine:
+--------------------------------------------
+1.  Install nodeJS
+2. npm comes with nodeJS
+3. install json-server 
+	-npm install -g json-server
+
+setup completed:
+Now, we need to populated some data on json server as when request will be sent
+then response is expected
+
+lets create one json file with data:
+created, now we need to keep this file in a folder and run command to get the
+data in server
+
+cmd: json-server info.json
+
+this command will start your API's: you will get the resourcee urls
+http://localhost:3000/employees --- up and running
+
+now in postman do operations
+GET
+POST
+PUT
+DELETE
+
+POSTMAN Variables:
+------------------
+re-usability
+if url got changed then in all the request need to change the url,
+so better to change url and everthng will be changes
+
+2 variables:
+-------------
+1. Collection variable (inside particular collection)
+2.Environment/Global variables (throughout multiple collections)
+
+1. Collection Variables:
+-------------------------
+1st way: variable tab:
+	edit collection > variables > add a variable
+	how to use?
+	wherever required use the variable in {{variable}}
+	
+2nd way pre-requisite scripts:
+	write the scripts
+	postman.setGlobalVariable("url","http://localhost:3000")
+	
+2. Environment/Global Variables:
+--------------------------------
+	Add environment
+	QA environment > creeatted variable  will be  associated  with this environment
+	Runntime > collection > select QA environment and run
+	can have multiple variables
+
+WorkFlow:
+---------
+Go to request's pre request tab
+under tests tab:
+postman.setNextRequest("GetSingleUser") #sync which to run after this req
+
+5th session:
+------------
+Howw to Chain API requests and API Authorisations:
+---------------------------------------------------
+Chaining:
+---------
+API req 1 ---> Response
+Input = take some input from Response 1
+
+API Req 2 (Input) ---> Response 2
+
+List of users: https://reqres.in/api/users?page=2
+Put: https://reqres.in/api/users/2
+
+First
+parse the json reponse in variable
+	jsondata = JSON.parse(responseBody);
+Now, extract the value from the response which need to be passed as an input
+	value = jsondata.data[0].first_name
+Now, Add the global variable at collection level and set that variable in tests
+	pm.globals.set("username", value);
+
+OR
+simply, without adding variablle at collection level
+	pm.globals.set("username", value);
+
+Authorizations:
+---------------
+when sending request --> some authorization needs to be sent
+	- credential
+	- tokens
+Basic Auth:
+-----------
+	pass username and password
+	https://postman-echo.com/basic-auth
+	pass authorization details, intially 401  unauthorized
+		under Auth tab > Basic Auth:
+			provide credentials
+			- authorization:True
+
+API key:
+--------
+http://api.openweathermap.org/data/2.5/forecast/daily?q=Delhi&cnt=1
+Initially without API key:
+	{
+    "cod": 401,
+    "message": "Invalid API key. Please see http://openweathermap.org/faq#error401 for more info."
+	}
+
+Now, Adding the API key/app id
+	Get your APi key/app id : f280a5b06788a0140c983adbcbdaa307
+	
+Bearer token/ OAuth2:
+---------------------
+Github using api to update/delete repositories
+how to create neew repository in github using rest api and that api will use a token
+
+URL: http://developer.github.com/v3/repos
+link: Create a repository for the authenticated user
+
+Resourse:
+POST /user/repos    create new repository
+
+name	string	body	
+Required. The name of the repository.
+
+{
+	"name" : "New Repo",
+	"description" : "creating repo using api",
+	"homepage" : "https://github.com",
+	"private" : false,
+}
+
+For Post request:
+https://api.github.com/user/repos
+
+initially:
+{
+    "message": "Requires authentication",
+    "documentation_url": "https://docs.github.com/rest/reference/repos#list-repositories-for-the-authenticated-user"
+}
+
+Need authentication:
+	login to github>settings>developer settings> personal access token> generate new token
+	provide the name select repose and generate the token
+	
+Now back to postman:
+	authentication:
+		OAuth2/Bearer Token : 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
+		
+Write scripts in Postman:
+-------------------------
+Where to write?
+1. pre-request scripts tab:
+ Before a request is sent to the server, as a pre-request script under the 
+ Pre-request Script tab.
+ BA pre-request script associated with a request will execute before 
+ the request is sent
+2. Tests tab
+ After a response is received, as a test script under the Tests tab.
+ test script associated with a request will execute after the request is sent
+
+Specify the scripts:
+1. collection level
+2. folder level (within collection)
+3. request level
+
+Lets do:
+--------
+	Collection:
+		Folder:
+			Request:
+add  pre-requiste and test to all level:
+console.log("message");
+
+POSTMAN Scripting with javascript and Chai BDD framework:
+---------------------------------------------------------
+pm.test("Status code is 200", function () {
+    pm.response.to.have.status(200);
+});
+
+//Multiple assertions
+----------------------
+pm.test("multiple assert", function() {
+    responsejson = pm.response.json();
+    pm.expect(responsejson.data.id).to.eql(2);
+    pm.expect(responsejson.data.email).to.eql("janet.weaver@reqres.in");
+    pm.expect(responsejson.data.first_name).to.eql("Janet");
+});
+
+//handling responses that don't parse
+-------------------------------------
+pm.test("Body contains a string", function() {
+    pm.expect(pm.response.text()).to.include("janet.weaver@reqres.in");
+});
+
+//Contains any of the status so it will pass
+--------------------------------------------
+pm.test("success status code", function() {
+    pm.expect(pm.response.code).to.be.oneOf([200,201]);
+});
+
+//To validate the header part
+------------------------------
+pm.test("content-type in header", function() {
+
+    pm.response.to.have.header("Content-Type");
+});
+
+///Value of header
+-------------------
+pm.test("content type value", function() {
+    pm.expect(pm.response.headers.get("Content-Type")).to.eql("application/json; charset=utf-8");
+});
+
+//Testing the cookies
+---------------------
+pm.test("cookie presence", function() {
+    pm.expect(pm.cookies.has("__cfduid")).to.be.true;
+});
+
+//cookie value check
+--------------------
+pm.test("cookie value", function() {
+    pm.expect(pm.cookies.get("cookiename")).to.eql("expectedValue");
+});
+
+//Response Time of API
+----------------------
+pm.test("response less than 20ms", function() {
+    pm.expect(pm.response.responseTime).to.be.below(165);
+});
+
+Create own API and Run on your own system, Also File Upload and Download:
+-------------------------------------------------------------------------
+- need one restapi
+Run the App:
+java -jar target/file-demo-0.0.1-SNAPSHOT.jar
+
+Single File upload:
+--------------------
+http://localhost:8080/uploadFile
+post > form data > file > select a file
+response:
+{
+    "fileName": "details.PNG",
+    "fileDownloadUri": "http://localhost:8080/downloadFile/details.PNG",
+    "fileType": "image/png",
+    "size": 263571
+}
+	verify filename in test script:
+	-------------------------------
+	pm.test("response", function() {
+    jsonresp = pm.response.json();
+    pm.expect(jsonresp.fileName).to.eql("setting.PNG");
+	});
+
+
+Multiple File upload:
+---------------------
+http://localhost:8080/uploadMultipleFiles
+	Select multiple files and upload
+	
+Download file:
+--------------
+	Get request at the url
+	
+Session - 7:
+------------
+Export/Import collections > maintain > when needed import into postman tool
